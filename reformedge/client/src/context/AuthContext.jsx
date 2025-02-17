@@ -1,30 +1,31 @@
-import { createContext, useState, useEffect } from "react";
+// src/context/AuthContext.jsx
+import { createContext, useState } from "react";
+import { login as loginService, logout as logoutService, register as registerService } from "../services/authService";
 
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    // Check if user is already logged in (stored in localStorage)
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData)); // Store user data
+  const login = async (credentials) => {
+    const response = await loginService(credentials);
+    setUser(response.data.user);
+    return response;
   };
 
-  const logout = () => {
+  const register = async (userData) => {
+    const response = await registerService(userData);
+    // Optionally, automatically log in the user after registration
+    return response;
+  };
+
+  const logout = async () => {
+    await logoutService();
     setUser(null);
-    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
