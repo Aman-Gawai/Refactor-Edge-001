@@ -1,52 +1,41 @@
 import express from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { body, validationResult } from "express-validator";
-import User from "../models/User.js";
-import dotenv from "dotenv";
-import { registerUser } from '../controllers/authController.js';
+import { body } from "express-validator";
+import { 
+  registerUser, 
+  loginUser, 
+  logoutUser,
+  forgotPassword, 
+  resetPassword 
+} from "../controllers/authController.js";
 
-dotenv.config();
 const router = express.Router();
 
-router.post('/register', registerUser);
+// Validation middleware
+const loginValidation = [
+  body("email").isEmail().withMessage("Invalid email"),
+  body("password").notEmpty().withMessage("Password is required"),
+];
 
-// **Login User**
-router.post(
-  "/login",
-  [
-    body("email").isEmail().withMessage("Invalid email"),
-    body("password").notEmpty().withMessage("Password is required"),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+const registerValidation = [
+  body("name").notEmpty().withMessage("Name is required"),
+  body("email").isEmail().withMessage("Invalid email"),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+];
 
-    try {
-      const { email, password } = req.body;
-      const user = await User.findOne({ email });
+// Auth routes
+router.post("/register", registerValidation, registerUser);
+router.post("/login", loginValidation, loginUser);
+router.post("/logout", logoutUser);
 
-      if (!user) return res.status(400).json({ message: "Invalid credentials" });
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-
-      const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: "7d",
-      });
-
-      res.cookie("token", token, { httpOnly: true, secure: false });
-      res.json({ message: "Login successful", token, user });
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
-    }
-  }
+// Password reset routes
+router.post("/forgot-password", 
+  body("email").isEmail().withMessage("Invalid email"),
+  forgotPassword
 );
 
-// **Logout User**
-router.post("/logout", (req, res) => {
-  res.clearCookie("token");
-  res.json({ message: "Logged out successfully" });
-});
+router.post("/reset-password", [
+  body("token").notEmpty().withMessage("Token is required"),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+], resetPassword);
 
 export default router;
