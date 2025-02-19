@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes.js"; 
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import userRoutes from "./routes/userRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,17 +25,19 @@ app.use(cors({
 }));
 app.use(cookieParser());
 
-// Connect to MongoDB with error handling
+// Connect to MongoDB with options and error handling
 mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected Successfully"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('MongoDB Atlas Connected Successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Mount auth routes
-app.use("/api/auth", authRoutes); 
-
-// dashboard routes
+// Mount routes
+app.use("/api/auth", authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("ReformEdge API is running...");
