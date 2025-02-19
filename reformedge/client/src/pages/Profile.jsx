@@ -9,11 +9,9 @@ const Profile = () => {
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
-    profilePic: "",
     bio: "",
     location: "",
-    socialLinks: { linkedin: "", github: "", twitter: "" },
-    preferences: { notifications: true, newsletter: false },
+    socialLinks: { linkedin: "", github: "", twitter: "" }
   });
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -31,11 +29,6 @@ const Profile = () => {
       setProfileData((prev) => ({
         ...prev,
         socialLinks: { ...prev.socialLinks, [name]: value },
-      }));
-    } else if (name in profileData.preferences) {
-      setProfileData((prev) => ({
-        ...prev,
-        preferences: { ...prev.preferences, [name]: e.target.checked },
       }));
     } else {
       setProfileData({ ...profileData, [name]: value });
@@ -71,14 +64,6 @@ const Profile = () => {
             name="email"
             placeholder="Email"
             value={profileData.email}
-            onChange={handleChange}
-            className="p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-primary"
-          />
-          <input
-            type="text"
-            name="profilePic"
-            placeholder="Profile Picture URL"
-            value={profileData.profilePic}
             onChange={handleChange}
             className="p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-primary"
           />
@@ -124,30 +109,6 @@ const Profile = () => {
               onChange={handleChange}
               className="p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-primary w-full"
             />
-          </div>
-          {/* Preferences */}
-          <div className="space-y-4">
-            <h3 className="text-white font-semibold">Preferences</h3>
-            <div className="flex items-center gap-2 text-white">
-              <input
-                type="checkbox"
-                name="notifications"
-                checked={profileData.preferences.notifications}
-                onChange={handleChange}
-                className="form-checkbox h-5 w-5 text-primary rounded border-gray-700"
-              />
-              <label>Enable Notifications</label>
-            </div>
-            <div className="flex items-center gap-2 text-white">
-              <input
-                type="checkbox"
-                name="newsletter"
-                checked={profileData.preferences.newsletter}
-                onChange={handleChange}
-                className="form-checkbox h-5 w-5 text-primary rounded border-gray-700"
-              />
-              <label>Subscribe to Newsletter</label>
-            </div>
           </div>
           <button
             type="submit"
